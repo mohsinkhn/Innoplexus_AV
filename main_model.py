@@ -79,7 +79,7 @@ if __name__ == "__main__":
     X_url_train = vec.transform(train["Url"])
     X_url_test = vec.transform(test["Url"])
 
-    # Predictions from webpage text only model
+    # Predictions from text model
     train_text = pd.read_csv(config.TRAIN_TEXT_MODEL_PATH)
     test_text = pd.read_csv(config.TEST_TEXT_MODEL_PATH)
 
@@ -91,9 +91,9 @@ if __name__ == "__main__":
     print("Shape of train and test after concatenating features are ",
           X_train.shape, X_test.shape)
 
-    # Logistic regression
+    # Model
     model = LogisticRegression(C=0.1, solver="liblinear", class_weight="balanced",
-                               max_iter=300, dual=True, random_state=123, verbose=1)
+                               max_iter=300, dual=True, random_state=123)
     y_preds = cross_val_predict(model, X_train, y, cv=cvlist, method='predict_proba',
                                 n_jobs=-1)
     model.fit(X_train, y)

@@ -1,10 +1,8 @@
-import gc
 import pandas as pd
 import numpy as np
 
 import config
 
-from pathlib import Path
 from sklearn.linear_model import LogisticRegression
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import FeatureUnion
@@ -12,9 +10,6 @@ from sklearn.pipeline import FeatureUnion
 from sklearn.model_selection import cross_val_predict, GroupKFold
 
 from sklearn.metrics import f1_score
-
-
-MODEL_IDENTIFIER = "linear_model_20k"
 
 
 def main():
@@ -30,26 +25,26 @@ def main():
     train["target_str"] = train["Domain"].astype(str) + train["Tag"].astype(str)
     cvlist = list(GroupKFold(5).split(train, groups=train["target_str"].astype('category')))
 
-    # TFIDF vectorizers for words and characters of URL.
-    # Parameters were chosen randomly due to lack of time. Tuning these could improve score
+    # TFIDF for words and characters
     vec1 = TfidfVectorizer(ngram_range=(1, 4), analyzer="char",
                            min_df=1000, max_df=1.0, strip_accents='unicode', use_idf=1,
                            smooth_idf=1, sublinear_tf=1, max_features=20000)
     vec2 = TfidfVectorizer(ngram_range=(1, 1), analyzer="word",
                            min_df=1000, max_df=1.0, strip_accents='unicode', use_idf=1,
                            smooth_idf=1, sublinear_tf=1, max_features=20000)
+
     vec = FeatureUnion([("char", vec1), ("word", vec2)])
     vec.fit(pd.concat([train["text"], test["text"]]))
     X = vec.transform(train["text"])
     X_test = vec.transform(test["text"])
-    print("Shape of train and test after TFIDF transformation".format( X.shape, X_test.shape))
+    print("Shape of train and test after TFIDF transformation".format(X.shape, X_test.shape))
 
-    # Run Logistic regression in cross validation to get out-of-fold predictions on validation
-    # Fit again on all train data and predict on test data
+    # Model
     y = train["target"].values
     model = LogisticRegression(C=1, class_weight='balanced', dual=True, solver='liblinear')
     y_preds = cross_val_predict(model, X, y, cv=cvlist, method='predict_proba')
-    y_test_preds = model.fit(X, y).predict_proba(X_test)
+    model.fit(X, y)
+    y_test_preds = model.predict_proba(X_test)
     print("Overall f1 score for text only model", f1_score(y, np.argmax(y_preds, axis=1), average="weighted"))
 
     # Save out-of-fold and test predictions
