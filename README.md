@@ -1,7 +1,7 @@
 ## Innoplexus_AV
 Repository with 1st place solution for Innoplexus Hackathon hosted on Analytics Vidhya.
 
-To get submission that scored 2nd on both private and public leaderboards, just make appropriate changes to config.py file and run `bash run_all.sh`   
+To get submission that scored 1st on private and 2nd on public leaderboards, just make appropriate changes to config.py file and run `bash run_all.sh`   
 
 ### Dependencies
 - beautifulsoup4 >= 4.6.0
